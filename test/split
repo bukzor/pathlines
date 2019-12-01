@@ -1,0 +1,25 @@
+#!/bin/bash
+HERE="$(dirname "$(readlink -f "$0")")"
+PATH="$HERE:$PATH"
+source $HERE/testing.sh
+
+assert_unsplit() {
+  path="$1"
+  path2="$(split <<< "$path" | unsplit)"
+  assert_equal "$path" "$path2"
+
+  # A little demo why this representation is useful:
+  path3="$(sed -E 's@/+@/@g; s@(.)/$@\1@; s/^$/./' <<< "$path")"
+  path4="$(split <<< "$path" | grep . | unsplit)"
+  assert_equal "$path3" "$path4"
+}
+
+# A few things that actually failed:
+assert_unsplit "/"
+assert_unsplit "."
+
+tests=1000
+while [ $((tests--)) -gt 1 ]; do
+  r="$RANDOM"
+  assert_unsplit "$(rando "$r")"
+done

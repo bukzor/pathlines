@@ -1,0 +1,21 @@
+#!/bin/bash
+set -euo pipefail
+HERE="$(dirname "$(readlink -f "$0")")"
+
+src="$1"
+dst="$2"
+
+# Put dst in same terms as src.
+dst="$( (echo "$src"; echo "$dst") | $HERE/join)"
+
+(
+  comm -23 --nocheck-order \
+      <(echo "$src" | $HERE/split) \
+      <(echo "$dst" | $HERE/split) |
+    sed 's/.*/../' \
+  ;
+  comm -13 --nocheck-order \
+      <(echo "$src" | $HERE/split) \
+      <(echo "$dst" | $HERE/split) \
+  ;
+) | $HERE/unsplit

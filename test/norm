@@ -1,0 +1,28 @@
+#!/bin/bash
+HERE="$(dirname "$(readlink -f "$0")")"
+PATH="$HERE/..:$PATH"
+source $HERE/lib
+
+assert_norm() {
+  path="$1"
+  echo path: "$path"
+
+  # a little demo why this representation is useful:
+  if expr "$path" : "^/" >/dev/null; then
+    old="/$(realpath -m "$path" --relative-to / | sed 's/^\.$//')"
+  else
+    old="$(realpath -m "$path" --relative-to .)"
+  fi
+  new="$(split <<< "$path" | norm | unsplit)"
+  assert_equal "$old" "$new"
+}
+
+# A few things that really failed:
+assert_norm ../../
+assert_norm ccc//../../
+
+tests=1000
+while [ $((tests--)) -gt 1 ]; do
+  r="$RANDOM"
+  assert_norm "$($HERE/rando "$r")"
+done

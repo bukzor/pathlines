@@ -1,0 +1,24 @@
+#!/bin/sed -nEf
+
+# An absolute path resets the buffer.
+\@^/$@ b overwrite
+
+# The first line just goes directly to the buffer.
+1 {
+  : overwrite
+  h
+  b continue
+}
+
+# Most things simply append to the buffer.
+H
+
+: continue
+# End of input: newlines become slashes, and empty-string means `.`.
+$ {
+  g
+  s@\n@/@g
+  s@^//@/@
+  s@^$@.@
+  p
+}

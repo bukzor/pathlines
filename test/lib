@@ -1,0 +1,13 @@
+set -euo pipefail
+assert_equal() {
+  printf '%q ' test "$1" = "$2"
+  printf '\n'
+  test "$1" = "$2"
+}
+
+onerr() {
+  : 'FAIL! (exit: '"$?"')'
+  set -e
+}
+trap 'onerr' ERR
+RANDOM=0  # deterministic, but unpredictable

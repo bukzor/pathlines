@@ -1,0 +1,32 @@
+#!/bin/sed -nEf
+
+# Remove consecutive slashes and single-dot segments.
+/^\.?$/ b continue
+
+x
+/^$/ b continue
+x
+
+# Double-dot deletes any prior segment.
+/^\.\.$/ {
+  x
+  /(^|\n)\.\.$/ {
+    H
+    b continue
+  }
+  s@(^|\n)[^/\n]+$@@
+  h
+  t continue
+}
+
+# Most things just append onto the path.
+H
+
+: continue
+# DEBUG
+##g; l;
+# End of input: print the buffer.
+$ {
+  g
+  p
+}

@@ -1,0 +1,50 @@
+#!/bin/bash
+set -uo pipefail
+
+gen_pathline() {
+  case $((RANDOM % 10)) in
+    0) echo /   ;;
+    1) echo .   ;;
+    2) echo ..  ;;
+    3) echo a   ;;
+    4) echo bb  ;;
+    5) echo ccc ;;
+    6) echo a   ;;
+    7) echo bb  ;;
+    8) echo ''  ;;
+    9)
+      echo ..
+      echo ..
+    ;;
+    *) exit 1   ;;
+  esac
+}
+gen_pathlines() {
+  i=$((RANDOM % 5))
+  while [ $((i--)) -ge 0 ]; do
+    gen_pathline
+    echo -n /
+  done
+}
+gen_path() {
+  seed="$RANDOM"
+  # NB: pipelines run in a subshell, with its own random seed
+  (RANDOM=$seed; gen_pathlines) |
+    tr '\n' '/' |
+    sed 's@/$@\n@'
+}
+assert_norm() {
+  in="$1"
+  out="$2"
+  test "$(normpath "$TESTPWD" "$in")" = "$out"
+}
+onerr() {
+  : 'FAIL! (exit: '"$?"')'
+  set -e
+}
+
+trap 'onerr' ERR
+
+RANDOM="${1:-0}"  # deterministic, but unpredictable
+
+gen_path

@@ -1,0 +1,5 @@
+#!/bin/sed -nEf
+s@/@\n@g
+# Represent absolute paths with a literal slash.
+s@^\n@/\n@ 
+p
